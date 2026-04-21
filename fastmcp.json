@@ -1,0 +1,58 @@
+{
+  "mcpServers": {
+    "perplexity-polza-mcp-server": {
+      "command": "uv",
+      "args": [
+        "run",
+        "python",
+        "-m",
+        "perplexity_polza_mcp_server.server"
+      ],
+      "cwd": ".",
+      "env": {
+        "POLZA_BASE_URL": "https://polza.ai/api/v1",
+        "PERPLEXITY_MODEL": "perplexity/sonar",
+        "PERPLEXITY_RESEARCH_MODEL": "perplexity/sonar-deep-research",
+        "LOG_LEVEL": "INFO"
+      }
+    }
+  },
+  "server": {
+    "name": "perplexity-polza-mcp-server",
+    "version": "0.1.0",
+    "description": "Perplexity models through the Polza.ai API",
+    "entrypoint": "perplexity_polza_mcp_server.server:create_app",
+    "dependencies": [
+      "fastmcp>=2.11.0",
+      "httpx>=0.28.1",
+      "pydantic>=2.8.2",
+      "python-dotenv>=1.0.1"
+    ],
+    "environment": {
+      "POLZA_API_KEY": {
+        "required": true,
+        "description": "Polza API key for calling Perplexity models"
+      },
+      "POLZA_BASE_URL": {
+        "required": false,
+        "default": "https://polza.ai/api/v1",
+        "description": "Base URL for the Polza API"
+      },
+      "PERPLEXITY_MODEL": {
+        "required": false,
+        "default": "perplexity/sonar",
+        "description": "Default Perplexity model id"
+      },
+      "PERPLEXITY_RESEARCH_MODEL": {
+        "required": false,
+        "default": "perplexity/sonar-deep-research",
+        "description": "Default research model id"
+      },
+      "LOG_LEVEL": {
+        "required": false,
+        "default": "INFO",
+        "description": "Logging level"
+      }
+    }
+  }
+}
