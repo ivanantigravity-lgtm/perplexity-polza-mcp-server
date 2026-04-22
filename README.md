@@ -1,5 +1,7 @@
 # Perplexity MCP Server via Polza.ai
 
+`mcp-name: io.github.ivanantigravity-lgtm/perplexity-polza-mcp-server`
+
 MCP сервер для `Claude Desktop`, который ходит в модели Perplexity через `Polza.ai`.
 
 Сделан в формате Python/FastMCP, чтобы его можно было нормально публиковать в:
