@@ -2,119 +2,142 @@
 
 `mcp-name: io.github.ivanantigravity-lgtm/perplexity-polza-mcp-server`
 
-MCP сервер для `Claude Desktop`, который ходит в модели Perplexity через `Polza.ai`.
-
-Сделан в формате Python/FastMCP, чтобы его можно было нормально публиковать в:
-
-- GitHub
-- PyPI
-- MCP Registry
+MCP сервер для `Claude Desktop` и `Claude Code`, который ходит в модели Perplexity (`Sonar`, `Sonar Pro`, `Sonar Reasoning`, `Sonar Deep Research`) через агрегатор [Polza.ai](https://polza.ai).
 
 ## Что умеет
 
 - `perplexity_model_guide` — шпаргалка по выбору модели под задачу
 - `perplexity_ask` — обычный вопрос в Perplexity
-- `perplexity_research` — более глубокий ресерч с веб-поиском
+- `perplexity_research` — более глубокий ресёрч с веб-поиском
 - `list_perplexity_models` — список доступных `perplexity/*` моделей из каталога Polza
 
-## Когда какую модель брать
+## Что нужно для установки
 
-`Sonar`
+- `Claude Desktop` или `Claude Code` (или любой другой MCP-клиент)
+- [`uv`](https://docs.astral.sh/uv/) (ставится одной командой, см. ниже)
+- Python 3.11+
+- `POLZA_AI_API_KEY` — ключ берётся на [polza.ai/dashboard/api-keys](https://polza.ai/dashboard/api-keys)
 
-Быстрый поиск + ответ. Хорош для новостей, фактов, Q&A, коротких суммаризаций и быстрых “что сейчас происходит”.
-
-`Sonar Pro`
-
-Когда обычный `Sonar` уже мелковат. Лучше для сравнений, более плотной структуры и follow-up вопросов.
-
-`Sonar Pro Search`
-
-Когда нужен более глубокий поиск, больше поисковых шагов и более агрессивный сбор источников.
-
-`Sonar Reasoning Pro`
-
-Когда важнее не просто найти, а аккуратно разобрать, сравнить и сделать вывод.
-
-`Sonar Deep Research`
-
-Когда задача уже похожа на полноценный ресерч, market scan или длинный отчёт по теме.
-
-## Локальный запуск
-
-Нужен Python 3.11+ и `uv`.
+Поставить `uv`:
 
 ```bash
-uv run python -m perplexity_polza_mcp_server.server
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-## Переменные окружения
+## Установка за 2 минуты (через PyPI + uvx)
 
-```env
-POLZA_API_KEY=your_polza_api_key
-POLZA_BASE_URL=https://polza.ai/api/v1
-PERPLEXITY_MODEL=perplexity/sonar
-PERPLEXITY_RESEARCH_MODEL=perplexity/sonar-deep-research
-LOG_LEVEL=INFO
-```
+Это самый простой путь: ничего клонировать не надо, `uvx` сам скачает пакет из PyPI.
 
-## Конфиг Claude Desktop
+### Claude Code / VS Code
 
-Файл на macOS:
-
-`~/Library/Application Support/Claude/claude_desktop_config.json`
-
-Пример:
+Создай файл `.mcp.json` в корне своего проекта:
 
 ```json
 {
   "mcpServers": {
     "perplexity-polza": {
-      "command": "uv",
-      "args": [
-        "run",
-        "python",
-        "-m",
-        "perplexity_polza_mcp_server.server"
-      ],
-      "cwd": "/Users/ivankhokholkov/perplexity-mcp-polza",
+      "command": "uvx",
+      "args": ["perplexity-polza-mcp-server@latest"],
       "env": {
-        "POLZA_API_KEY": "YOUR_POLZA_API_KEY",
-        "POLZA_BASE_URL": "https://polza.ai/api/v1",
-        "PERPLEXITY_MODEL": "perplexity/sonar",
-        "PERPLEXITY_RESEARCH_MODEL": "perplexity/sonar-deep-research",
-        "LOG_LEVEL": "INFO"
+        "POLZA_AI_API_KEY": "your-polza-api-key-here"
       }
     }
   }
 }
 ```
 
-## Публикация
+Перезапусти Claude Code — готово.
 
-Собрать пакет:
+### Claude Desktop (macOS)
 
-```bash
-uv run python -m build
+Открой файл `~/Library/Application Support/Claude/claude_desktop_config.json` и добавь:
+
+```json
+{
+  "mcpServers": {
+    "perplexity-polza": {
+      "command": "uvx",
+      "args": ["perplexity-polza-mcp-server@latest"],
+      "env": {
+        "POLZA_AI_API_KEY": "your-polza-api-key-here"
+      }
+    }
+  }
+}
 ```
 
-Проверить пакет:
+Перезапусти Claude Desktop.
+
+### Claude Desktop (Windows)
+
+Файл: `%APPDATA%\Claude\claude_desktop_config.json`. Содержимое такое же, как на macOS.
+
+## Как проверить, что работает
+
+После перезапуска Claude попроси:
+
+> Покажи доступные модели Perplexity через polza
+
+Claude должен вызвать tool `list_perplexity_models` и вернуть список.
+
+## Когда какую модель брать
+
+- `Sonar` — быстрый поиск + ответ. Новости, факты, Q&A, короткие суммаризации.
+- `Sonar Pro` — плотнее структура, сравнения, follow-up вопросы.
+- `Sonar Pro Search` — глубже поиск, больше поисковых шагов.
+- `Sonar Reasoning Pro` — не просто найти, а разобрать и сделать вывод.
+- `Sonar Deep Research` — полноценный ресёрч, market scan, длинный отчёт.
+
+Переключить дефолтную модель можно через переменные окружения `PERPLEXITY_MODEL` и `PERPLEXITY_RESEARCH_MODEL` — полный список ниже.
+
+## Переменные окружения
+
+| Переменная | Обязательная | По умолчанию | Описание |
+| --- | --- | --- | --- |
+| `POLZA_AI_API_KEY` | да | — | Ключ с polza.ai |
+| `POLZA_BASE_URL` | нет | `https://polza.ai/api/v1` | Base URL для chat completions (с `/v1` — это ожидаемо, endpoint OpenAI-совместим) |
+| `PERPLEXITY_MODEL` | нет | `perplexity/sonar` | Модель для `perplexity_ask` |
+| `PERPLEXITY_RESEARCH_MODEL` | нет | `perplexity/sonar-deep-research` | Модель для `perplexity_research` |
+| `LOG_LEVEL` | нет | `INFO` | — |
+
+## Локальная разработка
 
 ```bash
-uv run python -m twine check dist/*
+git clone https://github.com/ivanantigravity-lgtm/perplexity-polza-mcp-server.git
+cd perplexity-polza-mcp-server
+uv sync
+POLZA_AI_API_KEY=your_key uv run python -m perplexity_polza_mcp_server.server
 ```
 
-PyPI workflow уже лежит в `.github/workflows/publish-pypi.yml`.
+Для локального подключения из source в Claude:
 
-Для MCP Registry подготовлен файл `server.json`.
+```json
+{
+  "mcpServers": {
+    "perplexity-polza-local": {
+      "command": "uv",
+      "args": ["run", "python", "-m", "perplexity_polza_mcp_server.server"],
+      "cwd": "/absolute/path/to/perplexity-polza-mcp-server",
+      "env": {
+        "POLZA_AI_API_KEY": "your-polza-api-key-here"
+      }
+    }
+  }
+}
+```
 
-## Важные файлы
+## Под капотом
+
+- Chat completions: `POST https://polza.ai/api/v1/chat/completions` (OpenAI-совместимый формат)
+- Model catalog: `GET https://polza.ai/api/v1/models/catalog`
+
+## Важные файлы в репозитории
 
 - `pyproject.toml` — метаданные пакета и entry points
 - `server.json` — описание для MCP Registry
 - `fastmcp.json` — локальная конфигурация FastMCP
 - `.github/workflows/publish-pypi.yml` — публикация в PyPI через GitHub Actions
 
-## По API
+## Лицензия
 
-- Chat completions: `POST https://polza.ai/api/v1/chat/completions`
-- Model catalog: `GET https://polza.ai/api/v1/models/catalog`
+MIT.
